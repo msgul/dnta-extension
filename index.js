@@ -4,54 +4,74 @@ window.addEventListener("keydown", function(event) {
 });
 
 function encrypt(){
-    chrome.storage.local.get(['key'], function(result) {
-        var all = document.getElementsByTagName("*");
-        const symbol = "TOENCRYPT";
-        console.log("ENCRYPTION STARTED!");
-        for(elem of all){
-            if(elem.childNodes[0]){
-                if(elem.childNodes[0].nodeType == 3){
-                    let text = elem.childNodes[0].nodeValue;
-                    if(text.includes(symbol)){
-                        plaintext = text.split(symbol)[1];
-                        ciphertext = CryptoJS.AES.encrypt(plaintext, result.key).toString();
-                        elem.childNodes[0].nodeValue = "ENCRYPTED" + ciphertext + "ENCRYPTED" 
-                    }
-                }
-            }
-        }
 
-        console.log("ENCRYPTION DONE!");
+    chrome.storage.local.get(['key'], function(result) {
+        console.log("ENCRYPTION STARTED!");
+        let active = document.activeElement;
+
+        // for <input> elements
+        if(active.value && active.value != ""){
+            try{
+                let plaintext = active.value;
+                ciphertext = CryptoJS.AES.encrypt(plaintext, result.key).toString();
+                active.value = "ENCRYPTED" + ciphertext + "ENCRYPTED"
+            } catch(e){
+                console.log("ENCRYPTION ERROR", e);
+            }
+        } // for other elements
+        else if(active !== "undefined"){
+            let textnodes = textNodesUnder(active);
+            let textnode = textnodes[0];
+
+            try{
+                let plaintext = textnode.nodeValue;
+                ciphertext = CryptoJS.AES.encrypt(plaintext, result.key).toString();
+                textnode.nodeValue = "ENCRYPTED" + ciphertext + "ENCRYPTED" 
+            } catch(e){
+                console.log("ENCRYPTION ERROR", e);
+            }
+            console.log("ENCRYPTION DONE!");
+        } else{
+            console.log("ENCRYPTION ERROR", "NO ACTIVE ELEMENT");
+        }
     });
 }
 
 function decrypt() {
     chrome.storage.local.get(['key'], function(result) {
-        var all = document.getElementsByTagName("*");
         const symbol = "ENCRYPTED";
         console.log("DECRYPTION STARTED!");
+        let textnodes = textNodesUnder(document.body);
 
-
-        for(elem of all){
-            if(elem.childNodes[0]){
-                if(elem.childNodes[0].nodeType == 3){
-                    let text = elem.childNodes[0].nodeValue;
-                    if(text.includes(symbol)){
-                        ciphertext = text.split(symbol)[1];
-                        try{
-                            var bytes  = CryptoJS.AES.decrypt(ciphertext, result.key);
-                            var original = bytes.toString(CryptoJS.enc.Utf8);
-                            elem.childNodes[0].nodeValue = original;
-                        } catch(e){
-                            console.log("DECRYPTION ERROR!", e);
-                        }
-                        
-                    }
+        for(let textnode of textnodes){
+            let text = textnode.nodeValue;
+            if(text.indexOf(symbol) != -1){
+                ciphertext = text.split(symbol)[1];
+                try{
+                    var bytes  = CryptoJS.AES.decrypt(ciphertext, result.key);
+                    var original = bytes.toString(CryptoJS.enc.Utf8);
+                    textnode.nodeValue = original + "🔓";
+                } catch(e){
+                    console.log("DECRYPTION ERROR!", e);
                 }
             }
         }
+
         console.log("DECRYPTION DONE!");
     });
+}
+
+function textNodesUnder(node){
+    var all = [];
+    for (node=node.firstChild;node;node=node.nextSibling){
+        if (node.nodeType==3) {
+            all.push(node);
+        }
+        else {
+            all = all.concat(textNodesUnder(node));
+        }
+    }
+    return all;
 }
 
 
