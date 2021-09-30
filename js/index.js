@@ -1,10 +1,18 @@
 window.addEventListener("keydown", function(event) {
-    if(event.keyCode == 45) {encrypt();} 
-    if(event.keyCode == 46){decrypt();}
+
+    if(event.keyCode == 45 || event.keyCode == 46){
+        chrome.storage.local.get(['dnta'], function(result) {
+            if(result.dnta){
+                if(event.keyCode == 45)
+                    encrypt();
+                else
+                    decrypt();
+            }
+        });
+    }
 });
 
 function encrypt(){
-
     chrome.storage.local.get(['key'], function(result) {
         console.log("ENCRYPTION STARTED!");
         let active = document.activeElement;
@@ -38,6 +46,7 @@ function encrypt(){
 }
 
 function decrypt() {
+
     chrome.storage.local.get(['key'], function(result) {
         const symbol = "ENCRYPTED";
         console.log("DECRYPTION STARTED!");
@@ -64,7 +73,7 @@ function decrypt() {
 function textNodesUnder(node){
     var all = [];
     for (node=node.firstChild;node;node=node.nextSibling){
-        if (node.nodeType==3) {
+        if (node.nodeType == 3) {
             all.push(node);
         }
         else {

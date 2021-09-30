@@ -3,12 +3,10 @@
   "description": "Do not trust anyone!",
   "version": "1.0",
   "manifest_version": 3,
-  "background": {
-    "service_worker": "background.js"
-  },
+  "background": {},
   "permissions": ["storage", "activeTab", "scripting"],
   "content_scripts": [{
-    "js": ["crypto-js.min.js", "index.js"],
+    "js": ["js/crypto-js.min.js", "js/index.js"],
     "matches": ["http://*/*", "https://*/*"]
   }],
   "action": {
@@ -25,6 +23,5 @@
     "32": "/images/dnta-32.png",
     "48": "/images/dnta-48.png",
     "128": "/images/dnta-128.png"
-  },
-  "options_page": "options.html"
+  }
 }

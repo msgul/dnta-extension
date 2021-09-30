@@ -3,13 +3,23 @@ const key = document.getElementById("in-key");
 const view = document.getElementById("but-view");
 const set = document.getElementById("but-set");
 const rand = document.getElementById("but-rand");
+const toggle = document.getElementById("on-off");
+
+
+chrome.storage.local.get(['dnta'], function(result) {
+
+    if(result.dnta){
+        toggle.checked = true;
+    } else{
+        toggle.checked = false;
+    }
+});
 
 set.addEventListener("click", async () => {
     value = key.value;
 
     if(value !== ""){
         chrome.storage.local.set({key: value}, function() {
-            console.log('Value is set to ' + value);
             window.close();
         });
     }
@@ -35,7 +45,13 @@ function randKey(length) {
     return result;
 }
 
+toggle.addEventListener("change", async () => {
 
+    if(toggle.checked)
+        chrome.storage.local.set({dnta: true}, function() {});
+    else
+        chrome.storage.local.set({dnta: false}, function() {});
+});
 
 
 
