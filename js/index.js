@@ -1,3 +1,8 @@
+var input_event = new Event('input', {
+    'bubbles': true,
+    'cancelable': true
+});
+
 window.addEventListener("keydown", function(event) {
 
     if(event.keyCode == 45 || event.keyCode == 46){
@@ -23,11 +28,12 @@ function encrypt(){
                 let plaintext = active.value;
                 ciphertext = CryptoJS.AES.encrypt(plaintext, result.key).toString();
                 active.value = "ENCRYPTED" + ciphertext + "ENCRYPTED"
+                active.dispatchEvent(input_event);
             } catch(e){
                 console.log("ENCRYPTION ERROR", e);
             }
         } // for other elements
-        else if(active !== "undefined"){
+        else if(typeof active !== "undefined"){
             let textnodes = textNodesUnder(active);
             let textnode = textnodes[0];
 
@@ -35,6 +41,7 @@ function encrypt(){
                 let plaintext = textnode.nodeValue;
                 ciphertext = CryptoJS.AES.encrypt(plaintext, result.key).toString();
                 textnode.nodeValue = "ENCRYPTED" + ciphertext + "ENCRYPTED" 
+                textnode.dispatchEvent(input_event);
             } catch(e){
                 console.log("ENCRYPTION ERROR", e);
             }
@@ -46,7 +53,6 @@ function encrypt(){
 }
 
 function decrypt() {
-
     chrome.storage.local.get(['key'], function(result) {
         const symbol = "ENCRYPTED";
         console.log("DECRYPTION STARTED!");
@@ -55,17 +61,18 @@ function decrypt() {
         for(let textnode of textnodes){
             let text = textnode.nodeValue;
             if(text.indexOf(symbol) != -1){
-                ciphertext = text.split(symbol)[1];
+                textsplit = text.split(symbol);
+                ciphertext = textsplit[1];
                 try{
                     var bytes  = CryptoJS.AES.decrypt(ciphertext, result.key);
                     var original = bytes.toString(CryptoJS.enc.Utf8);
-                    textnode.nodeValue = original + "🔓";
+                    if(original == ""){throw "Wrong Key"}
+                    textnode.nodeValue = textsplit[0] + original + " 🔓 " + textsplit[2];
                 } catch(e){
                     console.log("DECRYPTION ERROR!", e);
                 }
             }
         }
-
         console.log("DECRYPTION DONE!");
     });
 }

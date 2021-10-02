@@ -1,10 +1,12 @@
 {
   "name": "DNTA",
   "description": "Do not trust anyone!",
-  "version": "1.0",
+  "version": "0.0.1",
   "manifest_version": 3,
-  "background": {},
-  "permissions": ["storage", "activeTab", "scripting"],
+  "background": {
+    "service_worker": "js/background.js"
+  },
+  "permissions": ["storage"],
   "content_scripts": [{
     "js": ["js/crypto-js.min.js", "js/index.js"],
     "matches": ["http://*/*", "https://*/*"]

@@ -5,7 +5,6 @@ const set = document.getElementById("but-set");
 const rand = document.getElementById("but-rand");
 const toggle = document.getElementById("on-off");
 
-
 chrome.storage.local.get(['dnta'], function(result) {
 
     if(result.dnta){
