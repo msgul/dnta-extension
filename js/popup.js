@@ -51,6 +51,3 @@ toggle.addEventListener("change", async () => {
     else
         chrome.storage.local.set({dnta: false}, function() {});
 });
-
-
-

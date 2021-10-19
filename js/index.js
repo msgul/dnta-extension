@@ -27,7 +27,7 @@ function encrypt(){
             try{
                 let plaintext = active.value;
                 ciphertext = CryptoJS.AES.encrypt(plaintext, result.key).toString();
-                active.value = "ENCRYPTED" + ciphertext + "ENCRYPTED"
+                active.value = ciphertext;
                 active.dispatchEvent(input_event);
             } catch(e){
                 console.log("ENCRYPTION ERROR", e);
@@ -40,7 +40,7 @@ function encrypt(){
             try{
                 let plaintext = textnode.nodeValue;
                 ciphertext = CryptoJS.AES.encrypt(plaintext, result.key).toString();
-                textnode.nodeValue = "ENCRYPTED" + ciphertext + "ENCRYPTED" 
+                textnode.nodeValue = ciphertext;
                 textnode.dispatchEvent(input_event);
             } catch(e){
                 console.log("ENCRYPTION ERROR", e);
@@ -54,20 +54,26 @@ function encrypt(){
 
 function decrypt() {
     chrome.storage.local.get(['key'], function(result) {
-        const symbol = "ENCRYPTED";
+        const symbol = "U2FsdGVkX1"; // Salted_
         console.log("DECRYPTION STARTED!");
         let textnodes = textNodesUnder(document.body);
 
         for(let textnode of textnodes){
             let text = textnode.nodeValue;
-            if(text.indexOf(symbol) != -1){
-                textsplit = text.split(symbol);
-                ciphertext = textsplit[1];
+            let index = text.indexOf(symbol)
+            if(index != -1){
+                let pre = text.slice(0, index);
+                let splitted = text.slice(index).split(/ (.+)/);
+                let ciphertext = splitted[0];
+                //textsplit = text.split(symbol);
+                //ciphertext = symbol + textsplit[1].split(/\s+/)[0];
+                console.log(ciphertext);
                 try{
                     var bytes  = CryptoJS.AES.decrypt(ciphertext, result.key);
                     var original = bytes.toString(CryptoJS.enc.Utf8);
-                    if(original == ""){throw "Wrong Key"}
-                    textnode.nodeValue = textsplit[0] + original + " 🔓 " + textsplit[2];
+                    if(original == "") throw "Wrong Key"
+
+                    textnode.nodeValue = pre + original + " 🔓 " + (splitted[1] || "");
                 } catch(e){
                     console.log("DECRYPTION ERROR!", e);
                 }
@@ -89,18 +95,3 @@ function textNodesUnder(node){
     }
     return all;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
